@@ -13,12 +13,14 @@ jobs:
       - name: Build in the official OpenWrt SDK
         run: |
           mkdir -p output
+          chmod 777 output
           docker run --rm \
-            -v "$PWD:/builder/package/gost:ro" \
+            -v "$PWD:/src/gost:ro" \
             -v "$PWD/output:/output" \
             ghcr.io/openwrt/sdk:mediatek-filogic-openwrt-25.12 \
             sh -ec '
               [ -d scripts ] || ./setup.sh
+              cp -a /src/gost /builder/package/gost
               ./scripts/feeds update packages
               ./scripts/feeds install golang
               printf "CONFIG_PACKAGE_gost=m\\n" > .config
