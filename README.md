@@ -1,8 +1,9 @@
 # openwrt-gost
 
 OpenWrt 25.12 package for [GOST v3](https://github.com/go-gost/gost), initially
-limited to aarch64 targets. The package builds GOST from source and installs a
-procd service with UCI-based multi-instance supervision.
+limited to aarch64 targets. The package installs the official statically linked
+Linux arm64 release binary and provides a procd service with UCI-based
+multi-instance supervision.
 
 ## Build
 
@@ -13,9 +14,6 @@ Add this repository as a package feed or copy it into an OpenWrt 25.12 SDK's
 make menuconfig                 # Network -> Web Servers/Proxies -> gost
 make package/gost/compile V=s
 ```
-
-The OpenWrt SDK/Buildroot must have the packages feed installed because the
-package uses `feeds/packages/lang/golang/golang-package.mk`.
 
 ## Configure multiple instances
 

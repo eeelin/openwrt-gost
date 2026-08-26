@@ -4,23 +4,15 @@ PKG_NAME:=gost
 PKG_VERSION:=3.2.6
 PKG_RELEASE:=1
 
-PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
-PKG_SOURCE_URL:=https://codeload.github.com/go-gost/gost/tar.gz/v$(PKG_VERSION)?
-PKG_HASH:=79874354530b899576dd4866d3b1400651d0b17c1e7a90ad30c44686a0642600
+PKG_SOURCE:=$(PKG_NAME)_$(PKG_VERSION)_linux_arm64.tar.gz
+PKG_SOURCE_URL:=https://github.com/go-gost/gost/releases/download/v$(PKG_VERSION)
+PKG_HASH:=f674c8f4a033dc1dfd4f0d5e9602fbe5b0d0f81307bf3794f44b5b5d6d622eae
 
 PKG_MAINTAINER:=claw-ruyi-homes
 PKG_LICENSE:=MIT
 PKG_LICENSE_FILES:=LICENSE
 
-PKG_BUILD_DEPENDS:=golang/host
-PKG_BUILD_PARALLEL:=1
-PKG_BUILD_FLAGS:=no-mips16
-
-GO_PKG:=github.com/go-gost/gost
-GO_PKG_BUILD_PKG:=$(GO_PKG)/cmd/gost
-
 include $(INCLUDE_DIR)/package.mk
-include $(TOPDIR)/feeds/packages/lang/golang/golang-package.mk
 
 define Package/gost
   SECTION:=net
@@ -41,9 +33,18 @@ define Package/gost/conffiles
 /etc/gost/
 endef
 
+define Build/Prepare
+	rm -rf $(PKG_BUILD_DIR)
+	$(INSTALL_DIR) $(PKG_BUILD_DIR)
+	$(TAR) -xzf $(DL_DIR)/$(PKG_SOURCE) -C $(PKG_BUILD_DIR)
+endef
+
+define Build/Compile
+endef
+
 define Package/gost/install
 	$(INSTALL_DIR) $(1)/usr/bin
-	$(INSTALL_BIN) $(GO_PKG_BUILD_BIN_DIR)/gost $(1)/usr/bin/gost
+	$(INSTALL_BIN) $(PKG_BUILD_DIR)/gost $(1)/usr/bin/gost
 
 	$(INSTALL_DIR) $(1)/etc/config
 	$(INSTALL_CONF) ./files/gost.config $(1)/etc/config/gost

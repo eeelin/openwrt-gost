@@ -21,8 +21,6 @@ jobs:
             sh -ec '
               [ -d scripts ] || ./setup.sh
               cp -a /src/gost /builder/package/gost
-              ./scripts/feeds update packages
-              ./scripts/feeds install golang
               printf "CONFIG_PACKAGE_gost=m\\n" > .config
               make defconfig
               make package/gost/compile V=s -j"$(nproc)"
