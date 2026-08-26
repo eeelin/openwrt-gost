@@ -1,0 +1,8 @@
+# See https://gost.run/en/reference/configuration/file/ for the full schema.
+services:
+  - name: socks5
+    addr: ":1080"
+    handler:
+      type: socks5
+    listener:
+      type: tcp
