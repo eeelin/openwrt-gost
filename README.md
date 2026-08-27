@@ -5,6 +5,11 @@ limited to aarch64 targets. The package installs the official statically linked
 Linux arm64 release binary and provides a procd service with UCI-based
 multi-instance supervision.
 
+The APK is marked architecture-independent so a single artifact can be
+installed across OpenWrt's different aarch64 ABI labels (for example,
+`aarch64_cortex-a53` and `aarch64_generic`). The package remains selectable
+only for aarch64 builds, and the installer rejects non-aarch64 systems.
+
 ## Install
 
 On a supported OpenWrt router, run:
