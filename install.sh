@@ -3,17 +3,13 @@
 set -eu
 
 REPOSITORY="eeelin/openwrt-gost"
-RELEASE_TAG="v0.1.0"
-PACKAGE_VERSION="3.2.6"
-PACKAGE_RELEASE="1"
-PACKAGE_SHA256="363ee88e03df18631fbcf046a15422ef1b1c8a17ad9c06ee43f8b948154c6fd6"
 ENABLE_SERVICE=1
 
 usage() {
 	cat <<EOF
 Usage: install.sh [--no-enable]
 
-Install openwrt-gost ${RELEASE_TAG} on OpenWrt 25.12 aarch64.
+Install the latest stable openwrt-gost release on OpenWrt 25.12 aarch64.
 
   --no-enable  Do not enable the gost init service at boot
   -h, --help   Show this help
@@ -79,18 +75,49 @@ esac
 
 command -v apk >/dev/null 2>&1 || die "apk is required; OpenWrt 24.10 and older are not supported"
 command -v sha256sum >/dev/null 2>&1 || die "sha256sum is required"
+command -v jsonfilter >/dev/null 2>&1 || die "jsonfilter is required"
 
-package="gost-${PACKAGE_VERSION}-r${PACKAGE_RELEASE}.apk"
-url="https://github.com/${REPOSITORY}/releases/download/${RELEASE_TAG}/${package}"
 tmpdir="$(mktemp -d /tmp/openwrt-gost.XXXXXX)"
 trap 'rm -rf "$tmpdir"' EXIT HUP INT TERM
 
-log "downloading ${package}"
-download "$url" "$tmpdir/$package" || die "failed to download $url"
+release_api="https://api.github.com/repos/${REPOSITORY}/releases/latest"
+log "checking the latest stable release"
+download "$release_api" "$tmpdir/release.json" || die "failed to query $release_api"
 
-actual_sha256="$(sha256sum "$tmpdir/$package" | awk '{print $1}')"
-[ "$actual_sha256" = "$PACKAGE_SHA256" ] || \
-	die "checksum mismatch: expected $PACKAGE_SHA256, got $actual_sha256"
+release_tag="$(jsonfilter -i "$tmpdir/release.json" -e '@.tag_name')"
+[ -n "$release_tag" ] || die "latest release response does not contain a tag"
+
+package_url=""
+checksum_url=""
+asset_urls="$(jsonfilter -i "$tmpdir/release.json" -e '@.assets[*].browser_download_url')"
+for asset_url in $asset_urls; do
+	case "$asset_url" in
+		*.apk)
+			[ -z "$package_url" ] || die "release $release_tag contains multiple APK files"
+			package_url="$asset_url"
+			;;
+		*.apk.sha256)
+			[ -z "$checksum_url" ] || die "release $release_tag contains multiple APK checksum files"
+			checksum_url="$asset_url"
+			;;
+	esac
+done
+
+[ -n "$package_url" ] || die "release $release_tag does not contain an APK"
+[ -n "$checksum_url" ] || die "release $release_tag does not contain an APK checksum"
+
+package="${package_url##*/}"
+checksum="${checksum_url##*/}"
+log "latest stable release is ${release_tag}"
+log "downloading ${package}"
+download "$package_url" "$tmpdir/$package" || die "failed to download $package_url"
+download "$checksum_url" "$tmpdir/$checksum" || die "failed to download $checksum_url"
+
+expected_sha256="$(awk 'NF { print $1; exit }' "$tmpdir/$checksum")"
+actual_sha256="$(sha256sum "$tmpdir/$package" | awk '{ print $1 }')"
+[ -n "$expected_sha256" ] || die "checksum file is empty"
+[ "$actual_sha256" = "$expected_sha256" ] || \
+	die "checksum mismatch: expected $expected_sha256, got $actual_sha256"
 log "checksum verified"
 
 log "installing ${package}"

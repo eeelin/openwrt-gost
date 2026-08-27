@@ -13,9 +13,10 @@ On a supported OpenWrt router, run:
 wget -O /tmp/install-gost.sh https://raw.githubusercontent.com/eeelin/openwrt-gost/main/install.sh && sh /tmp/install-gost.sh
 ```
 
-The installer verifies OpenWrt 25.12 and aarch64, checks the downloaded APK's
-SHA-256 checksum, installs it, and enables the init service at boot. To install
-without enabling the service:
+The installer queries GitHub for the latest stable release (drafts and
+prereleases are excluded), verifies OpenWrt 25.12 and aarch64, checks the APK
+against its accompanying `.sha256` release asset, installs or upgrades it, and
+enables the init service at boot. To install without enabling the service:
 
 ```sh
 sh /tmp/install-gost.sh --no-enable
