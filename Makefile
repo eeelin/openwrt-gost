@@ -2,7 +2,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=gost
 PKG_VERSION:=3.2.6
-PKG_RELEASE:=1
+PKG_RELEASE:=2
 
 PKG_SOURCE:=$(PKG_NAME)_$(PKG_VERSION)_linux_arm64.tar.gz
 PKG_SOURCE_URL:=https://github.com/go-gost/gost/releases/download/v$(PKG_VERSION)
@@ -20,7 +20,8 @@ define Package/gost
   SUBMENU:=Web Servers/Proxies
   TITLE:=GO Simple Tunnel
   URL:=https://github.com/go-gost/gost
-  DEPENDS:=$(GO_ARCH_DEPENDS) @aarch64 +ca-bundle
+  PKGARCH:=all
+  DEPENDS:=@aarch64 +ca-bundle
 endef
 
 define Package/gost/description
