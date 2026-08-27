@@ -5,6 +5,23 @@ limited to aarch64 targets. The package installs the official statically linked
 Linux arm64 release binary and provides a procd service with UCI-based
 multi-instance supervision.
 
+## Install
+
+On a supported OpenWrt router, run:
+
+```sh
+wget -O /tmp/install-gost.sh https://raw.githubusercontent.com/eeelin/openwrt-gost/main/install.sh && sh /tmp/install-gost.sh
+```
+
+The installer queries GitHub for the latest stable release (drafts and
+prereleases are excluded), verifies OpenWrt 25.12 and aarch64, checks the APK
+against its accompanying `.sha256` release asset, installs or upgrades it, and
+enables the init service at boot. To install without enabling the service:
+
+```sh
+sh /tmp/install-gost.sh --no-enable
+```
+
 ## Build
 
 Add this repository as a package feed or copy it into an OpenWrt 25.12 SDK's
